@@ -6,22 +6,17 @@ from dotenv import load_dotenv
 import logging
 load_dotenv()
 
-logging.basicConfig(
-    filename= "../logs/app.log",
-    filemode= "a",
-    format= "%(asctime)s - %(levelname)s - %(message)s",
-    level = logging.INFO
-)
+logger = logging.getLogger(__name__)
 
 def fetchMovies():
-    
-    bearer_token = os.getenv("TMBD_TOKEN")
+    logger.info("Starting extract process...")
+    bearer_token = os.getenv("TMDB_TOKEN")
     url = "https://api.themoviedb.org/3/movie/popular"
     time_stamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-    file_name = f"../data/raw_movies_{time_stamp}.json"
+    file_name = f"data/raw_movies_{time_stamp}.json"
 
     if not bearer_token:
-        raise ValueError("TMDB_TOKEN is missing from the .env file")
+        raise ValueError("TMDB_TOKEN is missing from the .env file.")
 
     headers = {
         "accept": "application/json",
@@ -36,9 +31,10 @@ def fetchMovies():
         with open(file_name, "w") as file:
             json.dump(data, file, indent=4)
 
-        logging.info("Raw movie data saved successfully")
+        logger.info("Extraction process completed successfully.")
         return data
     except requests.exceptions.RequestException as e:
+        logger.error(f"Data retrieval failed Error: [{type(e).__name__}]")
         raise RuntimeError(f"Data retrieval failed Error: [{type(e).__name__}]")
 
 if __name__ == "__main__":
